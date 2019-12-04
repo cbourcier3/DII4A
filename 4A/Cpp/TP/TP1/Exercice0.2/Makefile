@@ -3,7 +3,7 @@ CFLAGS = -Wall
 EXEC_NAME = main
 INCLUDES = #Etudiant.h
 LIBS = 
-OBJ_FILES = main.o Etudiant.o
+OBJ_FILES = main.o String.o
 INSTALL_DIR = /usr/bin
 
 all : $(EXEC_NAME)
