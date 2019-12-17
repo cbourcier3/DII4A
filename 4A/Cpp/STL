@@ -1,0 +1,125 @@
+std::pair<T1,T2>
+Une paire est une structure contenant deux éléments éventuellement de types différents. Certains algorithmes de la STL (find par
+ exemple) retournent des paires (position de l'élément trouvé et un booléen indiquant s'il a été trouvé).
+
+Complexité : insertion et accès en O(1)
+
+#include <pair> #include <iostream> #include <string> int main() { std::pair<int,std::string> p = std::make_pair(5, "pouet"); std::cout << p.first << ' ' << p.second << std::endl; return 0; }
+std::list<T,...>
+La classe list fournit une structure générique de listes chaînées pouvant éventuellement contenir des doublons.
+
+Complexité :
+Insertion (en début ou fin de liste) : O(1)
+Recherche : O(n) en général, O(1) pour le premier et le dernier maillon
+
+Exemple :
+
+Cet exemple montre comment insérer les valeurs 4, 5, 4, 1 dans une liste et comment afficher son contenu :
+
+#include <list> #include <iostream> int main() { std::list<int> ma_liste; ma_liste.push_back(4); ma_liste.push_back(5); ma_liste.push_back(4); ma_liste.push_back(1); std::list<int>::const_iterator lit (ma_liste.begin()), lend(ma_liste.end()); for(;lit!=lend;++lit) std::cout << *lit << ' '; std::cout << std::endl; return 0; }
+
+
+std::vector<T,...>
+La classe vector est proche du tableau du C. Tous les éléments contenus dans le vector sont adjacents en mémoire, ce qui permet d
+'accéder immédiatement à n'importe quel élément. L'avantage du vector comparé au tableau du C est sa faculté à se réallouer 
+automatiquement en cas de besoin lors d'un push_back ou d'un resize par exemple. Cependant une case n'est accessible par
+ l'opérateur [ ] que si elle a été allouée au préalable (sinon une erreur de segmentation se déclenche).
+
+ll ne faut pas perdre de vue qu'une réallocation mémoire est coûteuse en terme de performances. Ainsi si la taille d'un vecteur
+ est connue par avance, il faut autant que possible le créer directement à cette taille (voir méthodes resize et reserve).
+
+Exemple :
+
+#include <vector> #include <iostream> int main() { std::vector<int> mon_vecteur; mon_vecteur.push_back(4); 
+mon_vecteur.push_back(2); mon_vecteur.push_back(5); // Pour parcourir un vector (même const) on peut utiliser les iterators ou
+ les index for(std::size_t i=0;i<mon_vecteur.size();++i) { std::cout << mon_vecteur[i] << ' '; } std::cout << std::endl; 
+ std::vector<int> mon_vecteur(5,69); // crée le vecteur 69,69,69,69,69 v[0] = 5; v[1] = 3; v[2] = 7; v[3] = 4; v[4] = 8; return 0; }
+
+
+
+std::set<T,...>
+La classe set permet de décrire un ensemble ordonné et sans doublons d'éléments. Dans l'absolu il faut passer cet ordre en 
+paramètre template (plus précisément d'un foncteur). Par défaut, le foncteur std::less<T> (basé sur l'opérateur <) est utilisé, 
+ce qui revient à avoir un ensemble d'éléments classés du plus petit au plus grand.
+
+Concrètement il suffit donc d'implémenter l'opérateur < d'une classe ou d'une structure de type T pour pouvoir définir un std::set<T>. De plus, le type T doit disposer d'un constructeur vide T(). À noter que cet opérateur est déjà défini pour la plupart des classes de la STL (std::string, containers...).
+
+Pré-requis :
+Définir l'opérateur < sur le type T si on ordonne les éléments avec std::less<T>
+
+#include <set> #include <iostream> int main() { std::set<int> s; // équivaut à std::set<int, std::less<int> > s.insert(2); // s contient 2 s.insert(5); // s contient 2 5 s.insert(2); // le doublon n'est pas inséré s.insert(1); // s contient 1 2 5 std::set<int>::const_iterator sit (s.begin()), send(s.end()); for(;sit!=send;++sit) std::cout << *sit << ' '; std::cout << std::endl; return 0; }
+
+Attention :
+
+Le fait de supprimer ou ajouter un élément dans un std::set remet invalide ses iterators. Il ne faut donc pas modifier 
+un std::set dans une boucle for basée sur ses iterators.
+
+
+
+
+std::map<K,T,...>
+Une map permet d'associer une clé (identifiant) à une donnée (table associative).
+La map prend au moins deux paramètres templates :
+le type de la clé K
+le type de la donnée T
+
+Pré-requis :
+Définir l'opérateur < sur le type K si on ordonne les éléments avec std::less<K>
+Le type T impose juste d'avoir un constructeur vide.
+
+Attention :
+Le fait de supprimer ou ajouter un élément dans un std::map remet invalide ses iterators. Il ne faut pas modifier un std::map dans
+ une boucle for basée sur ses iterators
+le fait d'accéder à une clé via l'opérateur [ ] insère cette clé (avec la donnée T()) dans la map. Ainsi l'opérateur [ ] n'est
+ pas adapté pour vérifier si une clé est présente dans la map, il faut utiliser la méthode find. De plus, cet opérateur ne garantit
+  pas la constance de la map (à cause des insertions potentielles) et ne peut donc pas être utilisé sur des "const std::map<...>".
+
+
+Exemple :
+
+#include <map> #include <string> #include <iostream> int main() { std::map<std::string,unsigned> map_mois_idx; 
+map_mois_idx["janvier"] = 1; map_mois_idx["février"] = 2; //... std::map<std::string,unsigned>::const_iterator mit 
+(map_mois_idx.begin()), mend(map_mois_idx.end()); for(;mit!=mend;++mit) { std::cout << mit->first << '\t' << mit->second
+ << std::endl; } return 0; }
+
+
+Les iterators
+Nous avons vu dans la section précédente que les iterators permettaient de parcourir aisément une structure de la STL d'un bout
+ à l'autre. Un iterator rappelle un peu la notion de pointeur, mais ce n'est pas une adresse. Nous allons à présent voir quatre
+  iterators classiques de la STL.
+
+Ils sont définis pour toutes les classes de la STL évoquées ci-dessus hormis std::pair.
+iterator et const_iterator
+Un iterator (et un const_iterator) permet de parcourir un container du début à la fin.
+Un const_iterator, contrairement à un iterator, donne un accès uniquement en lecture à l'élément "pointé".
+Un iterator fournit quand a lui un accès en lecture et en écriture et permet donc de modifier le contenu du container (par
+ exemple on peut modifier l'élement "pointé" par l'iterator ou le supprimer du container).
+
+C'est pourquoi un container "const" peut être parcouru par des const_iterators mais pas des iterators. De manière générale,
+ quand on a le choix entre des iterators ou des const_iterator, il faut toujours privilégier les const_iterator car ils rendent 
+ la section de code à laquelle ils servent plus générique (applicable aux containers const ou non const).
+begin() : retourne un iterator qui pointe sur le premier élément
+end() : retourne un iterator qui pointe juste "après" le dernier élément
+++ : permet d'incrémenter l'iterator en le faisant passer à l'élément suivant.
+
+Exemple :
+
+#include <list> #include <iostream> const std::list<int> creer_liste() { std::list<int> l; l.push_back(3); l.push_back(4); return l; } int main() { const std::list<int> ma_liste(creer_liste()); /* // ne compile pas car l est const std::list<int>::iterator lit1 (l.begin()), lend1(l.end()); for(;lit1!=lend1;++lit1) std::cout << *lit1 << ' '; std::cout << std::endl; */ std::list<int>::const_iterator lit2 (l.begin()), lend2(l.end()); for(;lit2!=lend2;++lit2) std::cout << *lit2 << ' '; std::cout << std::endl; return 0; }
+reverse_iterator et const_reverse_iterator
+Le principe des reverse_iterators et const_reverse_iterator est similaire aux iterators et const_iterator à ceci prês que le parcours se fait dans le sens opposé.
+
+On utilise alors :
+rbegin() : retourne un iterator qui pointe sur le dernier élément
+rend() : retourne un iterator qui pointe juste "avant" le premier élément
+++ : permet de incrémenter le reverse_iterator en le faisant passer à l'élément précédent.
+
+Exemple :
+
+#include <set> #include <iostream> int main(){ std::set<unsigned> s; s.insert(1); // s = {1} s.insert(4); // s = {1, 4} s.insert(3); // s = {1, 3, 4} std::set<unsigned>::const_reverse_iterator sit (s.rbegin()), send(s.rend()); for(;sit!=send;++sit) std::cout << *sit << std::endl; return 0; }
+
+... affiche :
+
+4 3 1
+Les algorithmes
+Si le concept d'iterator est maîtrisé, il suffit de se référer à
+http://www.sgi.com/tech/stl/table_of_contents.html
